@@ -35,6 +35,17 @@ object ScalaTutorial{
 		
 		println(getSum(1,2,3,4,5,6,7,8,9,10))
 		
+		// Passing a function to a function
+		def times3 (num: Int) = 3 * num
+		def times4 (num: Int) = 4 * num
+		
+		def multIt(func: (Int) => Double, num: Int) = {
+		  func(num)
+		}
+		
+		printf("3 * 100 = %.1f\n", multIt(times3, 100))
+		printf("4 * 1000 = %.1f\n", multIt(times4, 1000))
+		
 
 	}
 }
