@@ -19,6 +19,9 @@ object MyProgram {
 
     println("\n**Fixed point")
     fixed_point.test()
+
+    println("\n**Rationals Test")
+    rationals.test()
   }
 }
 
@@ -129,8 +132,17 @@ object fixed_point{
   // First attempt
   // To calculate sqrt(x) by iteration towards a fixed point
   def sqrt(x: Double) = {
-    fixedPoint(y => x/y)(1.0)
-    // but this does not converage
+    //fixedPoint(y => x/y)(1.0) // this never returns !!
+    // but this does not converage. You need to get an average like this:
+    fixedPoint(y => (y + x/y) / 2)(1.0)
+  }
+
+  def averageDamp(f: Double => Double)(x: Double) = (x + f(x)) /2
+
+  // Exercise: Write a square root function using 'fixedPoint' and 'averageDamp'
+  def sqrt2(x: Double) : Double = {
+    // start with the version that didn't converge: y => x/y
+    fixedPoint(averageDamp(y => x / y))(1.0)
   }
 
   def test(): Unit = {
@@ -139,6 +151,74 @@ object fixed_point{
     // should return something close to 2
 
     println("sqrt(2) = " + sqrt(2))
+    println("sqrt2(2) = " + sqrt(2))
+  }
+}
+
+// Lecture 2.5 Functions and data
+// Lecture 2.6 More fun with Rationals
+// In this section we'll learn how functions and crate and encapsulate data structures
+// Rational number has a numerator and a denominator
+class Rational(x: Int, y: Int) { // primary constructor
+  require(y != 0, "denominator cannot be zero")
+
+  // second constructor
+  def this(x: Int) = this(x, 1) // calls the implicit primary constructor
+
+  private def gcd(a: Int, b: Int): Int = if(b==0) a else gcd(b, a % b)
+  private val g = gcd(x, y)
+  def numer = x / g
+  def denom = y / g
+
+  def less(that: Rational) = numer * that.denom < that.numer * denom
+  def <(that: Rational) = numer * that.denom < that.numer * denom // same as above
+
+  def max(that: Rational) = if(this.less(that)) that else this
+
+  // could have method such as add, subtract
+  def add(that: Rational): Rational = {
+    new Rational(
+      numer * that.denom + that.numer * denom,
+      denom * that.denom)
+  }
+
+  def neg() : Rational = {
+    new Rational ( -1 * numer, denom)
+  }
+
+  def sub(that: Rational): Rational = {
+    new Rational(
+      numer * that.denom - that.numer * denom,
+      denom * that.denom
+    )
+  }
+
+  // alternatively,
+  def unary_- : Rational = new Rational(-numer, denom)
+
+  override def toString = numer + "/" + denom
+}
+
+object rationals {
+  def test(): Unit ={
+
+    val x = new Rational(1,9)
+    println(x.numer)
+    println(x.denom)
+
+    val y = new Rational(2,3)
+    println("x.add(y) = " + x.add(y))
+
+    val z = x.neg
+    println("x.neg = " + z)
+    println("(x + z) = " + x.add(z))
+    println("(x - y) = " + x.sub(y))
+    println(" x.less(y)" + x.less(y))
+    println(" x.less(y)" + x.less(y))
+    println(" x.max(y)" + x.max(y))
+
+    //val a = new Rational(1,0) // throws IllegalArgumentException
+    // assert(x > 0) // throws AssertionError if triggered
   }
 }
 
