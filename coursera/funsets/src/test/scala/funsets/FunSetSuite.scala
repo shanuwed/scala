@@ -77,6 +77,7 @@ class FunSetSuite extends FunSuite {
     val s1 = singletonSet(1)
     val s2 = singletonSet(2)
     val s3 = singletonSet(3)
+    val s4 = singletonSet(4)
   }
 
   /**
@@ -109,6 +110,65 @@ class FunSetSuite extends FunSuite {
       assert(!contains(s, 3), "Union 3")
     }
   }
+  
+  test("Intersect contains common elements of all sets") {
+    new TestSets {
+      val s = union(s1, s2)
+      val t = union(s2, s3)
+      val result = intersect(s, t)
+      assert(contains(result, 2))
+      assert(!contains(result, 1))
+      assert(!contains(result, 3))
+    }
+  }
 
+  test("Diff - set of all elements of of s that are not in t") {
+    new TestSets {
+      val s = union(s1, s2)
+      val t = union(s2, s3)
+      val result = diff(s, t)
+      assert(contains(result, 1))
+      assert(!contains(result, 2))
+      assert(!contains(result, 3))
+      assert(!contains(result, 4))
+    }
+  }
+
+
+  test("Filter - returns a new set for which a predicate accepts") {
+    new TestSets {
+      val s = union(s1, s2)
+      val t = union(s2, s3)
+      val u = union(union(s, t), singletonSet(4))
+      val result = filter(u, x => {x % 2 == 0})
+      assert(!contains(result, 1), "filter 1")
+      assert(contains(result, 2), "Filter 2")
+      assert(!contains(result, 3), "Filter 3")
+      assert(contains(result, 4), "Filter 4")
+    }
+  }
+
+
+  test("Forall - bounded integer that satisfies p") {
+    new TestSets {
+      val s = union(s1, s2)
+      val t = union(s2, s3)
+      val u = union(s, t) // 1,2,3
+      val result = forall(u, x => {x < 4})
+      assert(result, "forall 1")
+      assert(!forall(u, x => {x < 1}), "forall 2")
+    }
+  }
+
+
+  test("Exists") {
+    new TestSets {
+      val s = union(s1, s2)
+      assert(exists(s, x => {x == 1}), "exists 1")
+      assert(exists(s, x => {x == 2}), "exists 2")
+      assert(!exists(s, x => {x == 3}), "exists 3")
+      assert(!exists(s, x => {x == 4}), "exists 4")
+    }
+  }
 
 }
