@@ -38,23 +38,23 @@ abstract class TweetSet {
    * This method takes a predicate and returns a subset of all the elements
    * in the original set for which the predicate is true.
    *
-   * Question: Can we implment this method here, or should it remain abstract
+   * Question: Can we implement this method here, or should it remain abstract
    * and be implemented in the subclasses?
    */
-    def filter(p: Tweet => Boolean): TweetSet = ???
+    def filter(p: Tweet => Boolean): TweetSet
   
   /**
-   * This is a helper method for `filter` that propagetes the accumulated tweets.
+   * This is a helper method for `filter` that propagates the accumulated tweets.
    */
   def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet
 
   /**
    * Returns a new `TweetSet` that is the union of `TweetSet`s `this` and `that`.
    *
-   * Question: Should we implment this method here, or should it remain abstract
+   * Question: Should we implement this method here, or should it remain abstract
    * and be implemented in the subclasses?
    */
-    def union(that: TweetSet): TweetSet = ???
+    def union(that: TweetSet): TweetSet
   
   /**
    * Returns the tweet from this set which has the greatest retweet count.
@@ -62,10 +62,10 @@ abstract class TweetSet {
    * Calling `mostRetweeted` on an empty set should throw an exception of
    * type `java.util.NoSuchElementException`.
    *
-   * Question: Should we implment this method here, or should it remain abstract
+   * Question: Should we implement this method here, or should it remain abstract
    * and be implemented in the subclasses?
    */
-    def mostRetweeted: Tweet = ???
+    def mostRetweeted: Tweet
   
   /**
    * Returns a list containing all tweets of this set, sorted by retweet count
@@ -73,10 +73,10 @@ abstract class TweetSet {
    * have the highest retweet count.
    *
    * Hint: the method `remove` on TweetSet will be very useful.
-   * Question: Should we implment this method here, or should it remain abstract
+   * Question: Should we implement this method here, or should it remain abstract
    * and be implemented in the subclasses?
    */
-    def descendingByRetweet: TweetList = ???
+    def descendingByRetweet: TweetList
   
   /**
    * The following methods are already implemented
@@ -107,7 +107,8 @@ abstract class TweetSet {
 }
 
 class Empty extends TweetSet {
-    def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = ???
+    def filter(p: Tweet => Boolean): TweetSet = filterAcc(p, new Empty)
+    def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = acc
   
   /**
    * The following methods are already implemented
@@ -120,13 +121,54 @@ class Empty extends TweetSet {
   def remove(tweet: Tweet): TweetSet = this
 
   def foreach(f: Tweet => Unit): Unit = ()
+
+  def union(other: TweetSet): TweetSet = other
+
+  def mostRetweeted: Tweet = throw new NoSuchElementException()
+
+  def descendingByRetweet: TweetList = Nil // isEmpty returns true
+
 }
 
 class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
 
-    def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = ???
-  
-    
+    def filter(p: Tweet => Boolean): TweetSet = filterAcc(p, new Empty)
+
+    def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = {
+      /*
+      This code block does not work!
+      if(p(elem)) {
+        println(elem.user)
+        acc.incl(elem)
+        //acc = new NonEmpty(elem, new Empty, new Empty) // NO!
+      }
+      left.filterAcc(p, acc)
+      right.filterAcc(p, acc)
+      acc
+      */
+      // But this works!
+      val filteredLeft = left.filterAcc(p, acc)
+      val filteredLeftAndRight = right.filterAcc(p, filteredLeft)
+      if( p(elem)) filteredLeftAndRight.incl(elem)
+      else filteredLeftAndRight
+
+    }
+
+    def union(other: TweetSet): TweetSet = {
+      left.union(right).union(other).incl(elem)
+    }
+
+    def mostRetweeted: Tweet = ???
+
+    def descendingByRetweet: TweetList = {
+      //new Cons(val head: Tweet, val tail: TweetList)
+      // hackhack
+      new Cons( new Tweet("a", "def", 21), Nil)
+    }
+
+
+
+
   /**
    * The following methods are already implemented
    */
@@ -192,5 +234,17 @@ object GoogleVsApple {
 
 object Main extends App {
   // Print the trending tweets
-  GoogleVsApple.trending foreach println
+  //GoogleVsApple.trending foreach println
+
+  val set1 = new Empty
+  val set2 = set1.incl(new Tweet("a", "a body", 20))
+  val set3 = set2.incl(new Tweet("b", "b body", 20))
+  val c = new Tweet("c", "c body", 7)
+  val d = new Tweet("d", "d body", 9)
+  val set4c = set3.incl(c)
+  val set4d = set3.incl(d)
+  val set5 = set4c.incl(d)
+
+  val set6 = set5.filter(tw => tw.user == "a")
+  println(set6.toString)
 }
