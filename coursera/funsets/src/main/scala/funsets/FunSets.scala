@@ -1,5 +1,7 @@
 package funsets
 
+import scala.annotation.tailrec
+
 
 /**
  * 2. Purely Functional Sets.
@@ -84,6 +86,7 @@ object FunSets {
    * Returns whether all bounded integers within `s` satisfy `p`.
    */
     def forall(s: Set, p: Int => Boolean): Boolean = {
+    @tailrec
       def iter(a: Int): Boolean = {
         if (a > bound) true
         else if (contains(s, a) && !p(a)) false
@@ -108,8 +111,13 @@ object FunSets {
   /**
    * Returns a set transformed by applying `f` to each element of `s`.
    */
-    def map(s: Set, f: Int => Int): Set = ???
-  
+    def map(s: Set, f: Int => Int): Set = {
+      def inner(arg: Int): Boolean = {
+        s(f(arg))
+      }
+      inner
+    }
+
   /**
    * Displays the contents of a set
    */

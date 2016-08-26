@@ -171,4 +171,16 @@ class FunSetSuite extends FunSuite {
     }
   }
 
+  test("Map - transform a set"){
+    new TestSets {
+      val s = union(s1, s2)
+      val r = map(s, x=> x * 2)
+      printSet(r)
+      //assert(!contains(r, 1), "Not contain 1")
+      //assert(!contains(r, 2), "Not contain 2")
+      //assert(contains(r, 6), "Contains 6")
+      //assert(contains(r, 7), "Contains 7")
+    }
+  }
+
 }
